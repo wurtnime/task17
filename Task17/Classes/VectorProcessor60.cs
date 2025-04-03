@@ -1,0 +1,80 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Task17.Classes
+{
+    public class VectorProcessor60
+    {
+        public VectorProcessor60() { }
+
+        public bool IsAccepted(string input, bool symbolMode, bool clockwise, bool zeroCountCriterion)
+        {
+            int state = 0;
+            int zeroCount = 0;
+            bool validPattern = true;
+            string currentSequence = "";
+
+            foreach (char c in input)
+            {
+                if (symbolMode)
+                {
+                    switch (char.ToLower(c))
+                    {
+                        case 'a': currentSequence = "0100"; break;
+                        case 'b': currentSequence = "110"; break;
+                        case 'c': currentSequence = "1110"; break;
+                        default: return false;
+                    }
+                }
+                else
+                {
+                    if (c != '0' && c != '1') return false;
+                    currentSequence += c;
+                }
+
+                foreach (char bit in currentSequence)
+                {
+                    int bitValue = bit - '0';
+                    if (bitValue == 0) zeroCount++;
+
+                    int prevState = state;
+                    switch (state)
+                    {
+                        case 0:
+                            state = (bitValue == 0) ?
+                                (clockwise ? 1 : 3) :
+                                (clockwise ? 2 : 1);
+                            break;
+                        case 1:
+                            if (bitValue != 0) validPattern = false;
+                            state = clockwise ? 2 : 0;
+                            break;
+                        case 2:
+                            state = (bitValue == 0) ?
+                                (clockwise ? 3 : 1) :
+                                (clockwise ? 0 : 3);
+                            break;
+                        case 3:
+                            if (bitValue != 1) validPattern = false;
+                            state = clockwise ? 0 : 2;
+                            break;
+                    }
+
+                    if (state == prevState)
+                    {
+                        validPattern = false;
+                    }
+                }
+
+                currentSequence = "";
+            }
+
+            return zeroCountCriterion ?
+                zeroCount % 2 == 0 : 
+                validPattern && state == 0; 
+        }
+    }
+}
